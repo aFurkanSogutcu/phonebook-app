@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  compose-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Docker Compose Up (build + run)
+        run: |
+          docker compose up --build -d
+          # backend hazır olana kadar basit retry
+          for i in {1..30}; do
+            if curl -fsS http://localhost:8000/health >/dev/null; then
+              echo "Backend is healthy"
+              break
+            fi
+            echo "waiting... ($i)"; sleep 3
+          done
+
+      - name: Smoke test API
+        run: |
+          curl -fsS http://localhost:8000/contacts >/dev/null
+
+      - name: Smoke test Frontend
+        run: |
+          curl -fsS http://localhost:5173 >/dev/null
+
+      - name: Compose Down
+        if: always()
+        run: docker compose down -v
