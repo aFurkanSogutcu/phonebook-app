@@ -1,0 +1,17 @@
+[
+    {
+        "id": "1",
+        "name": "Ayşe Yılmaz",
+        "phone": "+90 555 111 22 33"
+    },
+    {
+        "id": "2",
+        "name": "Mehmet Demir",
+        "phone": "+90 555 222 33 44"
+    },
+    {
+        "id": "3",
+        "name": "Elif Kaya",
+        "phone": "+90 555 333 44 55"
+    }
+]
