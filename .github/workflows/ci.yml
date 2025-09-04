@@ -15,6 +15,23 @@ jobs:
         run: |
           docker compose up --build -d
 
+      - name: Wait for API (via Nginx)
+        run: |
+          set -e
+          BASE=http://localhost:8080
+          for i in {1..60}; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" $BASE/api/contacts || true)
+            if [ "$code" = "200" ]; then
+              echo "API is up"; exit 0
+            fi
+            echo "[$i] waiting... (got $code)"; sleep 3
+          done
+          echo "API not ready in time"
+          docker compose ps
+          docker compose logs --no-log-prefix nginx backend || true
+          exit 1
+
+
       # Mini CRUD duman testi (Nginx üzerinden)
       - name: Smoke test API (CRUD)
         run: |
