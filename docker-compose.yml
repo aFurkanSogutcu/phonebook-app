@@ -6,6 +6,9 @@ services:
     command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
     volumes:
       - redis-data:/data
+
+
+    # kaldırılabilir ama alttaki backend.depends_on.redis.condition: service_healthy kısmını da kaldırman gerekebilir. bağlılar çünkü
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 2s
@@ -23,23 +26,23 @@ services:
       - REDIS_HOST=redis   # container'dan container'a erişimde servis adı
       - REDIS_PORT=6379
       # - REDIS_PASSWORD=${REDIS_PASSWORD}  # prod'da Secrets ile ekle
-    depends_on:
+    depends_on: # healthcheck kaldırılırsa bu koşul anlamsız kalır.
       redis:
         condition: service_healthy
     ports:
       - "8000:8000"
     restart: unless-stopped
 
-  frontend:
+  nginx:
     build:
-      context: ./frontend
-    environment:
-      - VITE_API_BASE=http://localhost:8000
+      context: .
+      dockerfile: infra/Dockerfile.nginx
+    ports:
+      - "8080:80"
     depends_on:
       - backend
-    ports:
-      - "5173:5173"
-    restart: unless-stopped
+
+    # restart: unless-stopped
 
 
 volumes:

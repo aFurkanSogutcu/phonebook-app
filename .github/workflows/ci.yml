@@ -14,22 +14,23 @@ jobs:
       - name: Docker Compose Up (build + run)
         run: |
           docker compose up --build -d
-          # backend hazır olana kadar basit retry
-          for i in {1..30}; do
-            if curl -fsS http://localhost:8000/health >/dev/null; then
-              echo "Backend is healthy"
-              break
-            fi
-            echo "waiting... ($i)"; sleep 3
-          done
 
-      - name: Smoke test API
+      # Mini CRUD duman testi (Nginx üzerinden)
+      - name: Smoke test API (CRUD)
         run: |
-          curl -fsS http://localhost:8000/contacts >/dev/null
+          BASE=http://localhost:8080
+          curl -fsS $BASE/api/contacts
+          curl -fsS -X POST $BASE/api/contacts \
+          -H "Content-Type: application/json" \
+          -d '{"name":"ci","phone":"+90 555 000 00 00"}'
+          curl -fsS $BASE/api/contacts
+          curl -fsS -X DELETE $BASE/api/contacts/ci
+          curl -fsS -X DELETE $BASE/api/contacts
 
-      - name: Smoke test Frontend
+      - name: Smoke test UI (HTML)
         run: |
-          curl -fsS http://localhost:5173 >/dev/null
+          BASE=http://localhost:8080
+          curl -fsS $BASE | grep -i "<!doctype html" >/dev/null
 
       - name: Compose Down
         if: always()
