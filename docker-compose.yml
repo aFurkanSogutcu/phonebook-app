@@ -44,8 +44,17 @@ services:
 
     # restart: unless-stopped
 
+  portainer:
+    image: portainer/portainer-ce:latest
+    ports:
+      - "9000:9000"   # HTTP (dev için pratik)
+      - "9443:9443"   # HTTPS (tercih edilen)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # Docker yönetimi
+      - portainer-data:/data                       # Kalıcı Portainer verisi
+    restart: unless-stopped
 
 volumes:
   redis-data:
-
+  portainer-data:
     
